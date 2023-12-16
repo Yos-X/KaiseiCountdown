@@ -3,7 +3,9 @@
 package ui.x
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -69,7 +71,7 @@ fun ApplicationScope.YosBasicWindow(title:String, size: DpSize = DpSize(Dp.Unspe
         ).value)
     }
 
-    val xRaw by derivedStateOf {
+    /*val xRaw by derivedStateOf {
         if (maximize) 0.dp else lastPositionX.dp
     }
 
@@ -83,7 +85,7 @@ fun ApplicationScope.YosBasicWindow(title:String, size: DpSize = DpSize(Dp.Unspe
     val y = animateDpAsState(
         yRaw
     )
-    state.position = WindowPosition(x.value,y.value)
+    state.position = WindowPosition(x.value,y.value)*/
 
     var scaleStatus by rememberSaveable {
         mutableStateOf(0)
@@ -104,9 +106,9 @@ fun ApplicationScope.YosBasicWindow(title:String, size: DpSize = DpSize(Dp.Unspe
         undecorated = true,
         state = state,
         transparent = true,
-        resizable = !maximize
+        resizable = /*!maximize*/ false
     ) {
-        MaterialTheme {
+        KaiseiTheme {
             val scale by animateFloatAsState(if (scaleStatus == 0) 0.8f else 1f, animationSpec = tween(200))
             val alpha by animateFloatAsState(if (scaleStatus == 0) 0.1f else 1f, animationSpec = tween(150))
 
@@ -122,10 +124,8 @@ fun ApplicationScope.YosBasicWindow(title:String, size: DpSize = DpSize(Dp.Unspe
                 shadowElevation = 2.dp,
                 tonalElevation = 1.dp
             ) {
-                Column {
-                    content()
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
+                content()
+                Row(modifier = Modifier.fillMaxWidth().padding(start = 80.dp)) {
                     MutableDraggable(!maximize) {
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(30.dp).height(40.dp),
@@ -153,13 +153,14 @@ fun ApplicationScope.YosBasicWindow(title:String, size: DpSize = DpSize(Dp.Unspe
                                     tint = Color.Black
                                 )
                             }
+
                             Spacer(modifier = Modifier.width(5.dp))
-                            var maxActive by remember { mutableStateOf(false) }
+                            //var maxActive by remember { mutableStateOf(false) }
                             Box(modifier = Modifier.size(35.dp)
                                 .clip(YosRoundedCornerShape(10.dp))
-                                .onPointerEvent(PointerEventType.Enter) { maxActive = true }
-                                .onPointerEvent(PointerEventType.Exit) { maxActive = false }
-                                .clickable {
+                                /*.onPointerEvent(PointerEventType.Enter) { maxActive = true }
+                                .onPointerEvent(PointerEventType.Exit) { maxActive = false }*/
+                                .clickable(enabled = false) {
                                     GlobalScope.launch {
                                         if (!maximize) {
                                             lastPositionX = state.position.x.value.toInt()
@@ -170,7 +171,8 @@ fun ApplicationScope.YosBasicWindow(title:String, size: DpSize = DpSize(Dp.Unspe
 
                                         maximize = !maximize
                                     }
-                                },
+                                }
+                                .alpha(0.2f),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -180,6 +182,7 @@ fun ApplicationScope.YosBasicWindow(title:String, size: DpSize = DpSize(Dp.Unspe
                                     tint = Color.Black
                                 )
                             }
+
                             Spacer(modifier = Modifier.width(5.dp))
                             var closeActive by remember { mutableStateOf(false) }
                             Box(modifier = Modifier.size(35.dp)
